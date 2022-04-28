@@ -19,6 +19,7 @@ npx mr-pdf --initialDocURLs="https://v1.docusaurus.io/docs/en/installation" --pa
 | Option                 | Required | Description                                                                                                                                                                        |
 | ---------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--initialDocURLs`     | Yes      | set URL to start generating PDF from.                                                                                                                                              |
+| `--stopURLs`           | Yes      | set urls to stop generationg PDF when found it.                                                                                                                                                |
 | `--contentSelector`    | Yes      | used to find the part of main content                                                                                                                                              |
 | `--paginationSelector` | Yes      | CSS Selector used to find next page to be printed for looping.                                                                                                                     |
 | `--excludeURLs`        | No       | URLs to be excluded in PDF                                                                                                                                                         |
@@ -31,6 +32,7 @@ npx mr-pdf --initialDocURLs="https://v1.docusaurus.io/docs/en/installation" --pa
 | `--coverTitle`         | No       | Title for the PDF cover.                                                                                                                                                           |
 | `--coverImage`         | No       | `<src>` Image for PDF cover (does not support SVG)                                                                                                                                 |
 | `--coverSub`           | No       | Subtitle the for PDF cover. Add `<br/>` tags for multiple lines.                                                                                                                   |
+| `--puppeteerArgs`      | No       | arguments for puppetter to be passed to Chrome browser.                                                                                                                   |
 |                        |
 
 ## 🎨 Examples and Demo PDF

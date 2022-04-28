@@ -17,6 +17,11 @@ program
     commaSeparatedList,
   )
   .option(
+    '--stopURLs <urls>',
+    'set urls to stop generationg PDF when found it',
+    commaSeparatedList,
+  )
+  .option(
     '--excludeURLs <urls>',
     'urls to be excluded in PDF',
     commaSeparatedList,
@@ -47,6 +52,7 @@ program
   .option('--disableTOC', 'disable table of contents')
   .option('--coverSub <subtitle>', 'subtitle for PDF cover')
   .option('--waitForRender <timeout>', 'wait for document render')
+  .option('--puppeteerArgs <args>', 'arguments for puppetter', commaSeparatedList)
   .action((options: generatePDFOptions) => {
     generatePDF(options)
       .then(() => {

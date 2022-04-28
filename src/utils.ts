@@ -4,6 +4,7 @@ import puppeteer = require('puppeteer');
 let contentHTML = '';
 export interface generatePDFOptions {
   initialDocURLs: Array<string>;
+  stopURLs: Array<string>;
   excludeURLs: Array<string>;
   outputPDFFilename: string;
   pdfMargin: puppeteer.PDFOptions['margin'];
@@ -22,6 +23,7 @@ export interface generatePDFOptions {
 
 export async function generatePDF({
   initialDocURLs,
+  stopURLs,
   excludeURLs,
   outputPDFFilename = 'mr-pdf.pdf',
   pdfMargin = { top: 32, right: 32, bottom: 32, left: 32 },
@@ -93,6 +95,11 @@ export async function generatePDF({
         console.log(chalk.green('Success'));
       }
 
+      if (stopURLs && stopURLs.includes(nextPageURL)) {
+        console.log(chalk.green('This is the ending URL.'));
+        break;
+      }
+
       // Find next page url before DOM operations
       nextPageURL = await page.evaluate((paginationSelector) => {
         const element = document.querySelector(paginationSelector);
@@ -115,30 +122,32 @@ export async function generatePDF({
 
   // Go to initial page
   await page.goto(`${initialDocURLs[0]}`, { waitUntil: 'networkidle0' });
-
-  const coverHTML = `
-  <div
-    class="pdf-cover"
-    style="
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      page-break-after: always;  
-      text-align: center;
-    "
-  >
-    ${coverTitle ? `<h1>${coverTitle}</h1>` : ''}
-    ${coverSub ? `<h3>${coverSub}</h3>` : ''}
-    <img
+  const coverHTML = (coverImage || coverTitle) ? `
+    <div
+      class="pdf-cover"
+      style="
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        page-break-after: always;  
+        text-align: center;
+      "
+    >
+      ${coverTitle ? `<h1>${coverTitle}</h1>` : ''}
+      ${coverSub ? `<h3>${coverSub}</h3>` : ''}
+      ${coverImage ?
+      `<img
       class="cover-img"
       src="data:image/png;base64, ${imgBase64}"
       alt=""
       width="140"
       height="140"
-    />
-  </div>`;
+      />` : ''}
+      
+    </div>` : '';
+
 
   // Add Toc
   const { modifiedContentHTML, tocHTML } = generateToc(contentHTML);
@@ -151,7 +160,9 @@ export async function generatePDF({
       body.innerHTML = '';
 
       // Add Cover
-      body.innerHTML += coverHTML;
+      if (coverHTML != '') {
+        body.innerHTML += coverHTML;
+      }
 
       // Add toc
       if (!disableTOC) body.innerHTML += tocHTML;
@@ -206,9 +217,8 @@ function generateToc(contentHtml: string) {
       .replace(/<[^>]*>/g, '')
       .trim();
 
-    const headerId = `${Math.random().toString(36).substr(2, 5)}-${
-      headers.length
-    }`;
+    const headerId = `${Math.random().toString(36).substr(2, 5)}-${headers.length
+      }`;
 
     // level is h<level>
     const level = Number(matchedStr[matchedStr.indexOf('h') + 1]);
@@ -233,8 +243,7 @@ function generateToc(contentHtml: string) {
   const toc = headers
     .map(
       (header) =>
-        `<li class="toc-item toc-item-${header.level}" style="margin-left:${
-          (header.level - 1) * 20
+        `<li class="toc-item toc-item-${header.level}" style="margin-left:${(header.level - 1) * 20
         }px"><a href="#${header.id}">${header.header}</a></li>`,
     )
     .join('\n');
